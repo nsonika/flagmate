@@ -1,45 +1,45 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
+
+// Mark the route as dynamic
+export const dynamic = "force-dynamic";
 
 export async function POST(req) {
   try {
     const { scenario } = await req.json();
 
-    const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY; // Securely fetch API key from environment variables
+    const apiKey = process.env.GROQ_API_KEY; // Ensure your API key is set in the .env.local file
     if (!apiKey) {
+      console.error("API key is missing!");
       return NextResponse.json(
         { error: "API key not configured" },
         { status: 500 }
       );
     }
 
-    const client = new OpenAI({
-      apiKey,
-      baseURL: "https://api.groq.com/openai/v1",
-    });
+    const groq = new Groq({ apiKey });
 
-    const response = await client.chat.completions.create({
-      model: "llama3-70b-8192",
+    const response = await groq.chat.completions.create({
       messages: [
         {
           role: "system",
-          content: `You are the "Red-Flag Detector," a playful yet insightful assistant analyzing relationship scenarios.
-          Keep responses fun and witty while providing valuable insights. Use emojis and casual language.
-          Structure your response with:
-          1. A clear verdict on the red flag level (🚩 rating out of 5)
-          2. A humorous but honest analysis
-          3. A playful analogy
-          4. Helpful suggestions wrapped in humor`,
+          content: `You are the "Red-Flag Detector," a playful yet insightful assistant analyzing relationship scenarios. Keep responses fun and witty while providing valuable insights. Use emojis and casual language.`,
         },
         { role: "user", content: scenario },
       ],
+      model: "llama-3.3-70b-versatile",
       temperature: 0.8,
       max_tokens: 500,
     });
 
-    return NextResponse.json({ analysis: response.choices[0].message.content });
+    const analysis =
+      response.choices[0]?.message?.content || "No response received.";
+    return NextResponse.json({ analysis });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
+    console.error("Error in Groq API route:", error.message);
+    return NextResponse.json(
+      { error: "Analysis failed", details: error.message },
+      { status: 500 }
+    );
   }
 }

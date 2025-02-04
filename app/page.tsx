@@ -1,6 +1,7 @@
 "use client";
 
-import RedFlagDetector from '@/components/RedFlagDetector';
+import RedFlagDetector from "../components/RedFlagDetector";
+
 
 export default function Home() {
   return (
