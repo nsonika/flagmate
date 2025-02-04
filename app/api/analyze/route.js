@@ -8,7 +8,7 @@ export async function POST(req) {
   try {
     const { scenario } = await req.json();
 
-    const apiKey = process.env.GROQ_API_KEY; // Ensure your API key is set in the .env.local file
+    const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY; // Ensure your API key is set in the .env.local file
     if (!apiKey) {
       console.error("API key is missing!");
       return NextResponse.json(
